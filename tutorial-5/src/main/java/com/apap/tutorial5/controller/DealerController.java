@@ -19,7 +19,8 @@ public class DealerController {
 	private CarService carService;
 	
 	@RequestMapping("/")
-	private String home() {
+	private String home(Model model) {
+		model.addAttribute("title", "View Dealer");
 		return "home";
 	}
 	
@@ -27,6 +28,8 @@ public class DealerController {
 	private String viewAll(Model model) {	
 		List<DealerModel> dealerlst = dealerService.getDealerList();
 		model.addAttribute("dealerlst",dealerlst);
+		model.addAttribute("title", "View Dealers");
+
 		return "view-all-dealers";
 	}
 
@@ -34,6 +37,7 @@ public class DealerController {
 	@RequestMapping(value = "/dealer/add", method = RequestMethod.GET)
 	private String add(Model model) {
 		model.addAttribute("dealer", new DealerModel());
+		model.addAttribute("title", "Add Dealer");
 		return "addDealer";
 	}
 	
@@ -47,6 +51,7 @@ public class DealerController {
 	private String deleteDealerSubmit(@PathVariable (value = "dealerId",required = true) Long dealerId) {
 		DealerModel dealer = dealerService.getDealerDetailById(dealerId).get();
 		dealerService.deleteDealer(dealer);
+
 		return "delete";
 	}
 	
@@ -54,12 +59,15 @@ public class DealerController {
 	private String updateDealer(@PathVariable (value = "dealerId",required = true) Long dealerId, Model model) {
 		DealerModel dealer = dealerService.getDealerDetailById(dealerId).get();
 		model.addAttribute("dealer",dealer);
+		model.addAttribute("title", "Update");
+
 		return "updateDealer";
 	}
 	
 	@RequestMapping(value = "/dealer/update/{dealerId}", method = RequestMethod.POST)
 	private String updateDealerSubmit(@PathVariable (value = "dealerId") long dealerId, @ModelAttribute DealerModel dealer) {
 		dealerService.updateDealer(dealerId, dealer);
+
 		return "update";
 	}
 	
@@ -69,6 +77,7 @@ public class DealerController {
 		model.addAttribute("dealer", dealer);
 		List<CarModel> archiveListCar = dealerService.getListCarOrderByPriceAsc(dealerId);
 		dealer.setListCar(archiveListCar);
+		model.addAttribute("title", "View Dealer");
 
 		return "view-dealer";
 	}
@@ -80,7 +89,8 @@ public class DealerController {
 			archiveDealer.setListCar(archiveListCar);
 			
 			model.addAttribute("dealer", archiveDealer);
-		return "view-Dealer";
+			model.addAttribute("title", "View Dealer");
+		return "view-dealer";
 	}
 
 }

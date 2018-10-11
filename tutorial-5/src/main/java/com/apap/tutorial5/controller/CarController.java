@@ -2,6 +2,11 @@ package com.apap.tutorial5.controller;
 
 import com.apap.tutorial5.model.*;
 import com.apap.tutorial5.service.*;
+
+import java.util.ArrayList;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,15 +20,53 @@ public class CarController {
 	@Autowired
 	private DealerService dealerService;
 	
-	@RequestMapping(value = "/car/add/{dealerId}", method = RequestMethod.GET)
-	private String add(@PathVariable(value = "dealerId") Long dealerId, Model model) {
-		CarModel car = new CarModel();
+	@RequestMapping(value = "/car/add/{dealerId}")
+	private String addCar(@PathVariable(value = "dealerId") Long dealerId, Model model) {
 		DealerModel dealer = dealerService.getDealerDetailById(dealerId).get();
-		car.setDealer(dealer);
-		
-		model.addAttribute("car", car);
+		//bikin arraylist baru buat mobil2 baru
+		dealer.setListCar(new ArrayList<CarModel>());
+		//biar ada 1 baris pas baru muncul
+		dealer.getListCar().add(new CarModel());
+		model.addAttribute("dealer", dealer);
+		model.addAttribute("headerTitle", "Add Car");
+
 		return "addCar";
 	}
+	
+	@RequestMapping(value = "/car/add/{dealerId}",params = {"addRow"},method = RequestMethod.POST)
+	private String addRow(@ModelAttribute DealerModel dealer , Model model) {
+		dealer.getListCar().add(new CarModel());
+		model.addAttribute("dealer", dealer);
+
+		return "addCar";
+	}
+
+	@RequestMapping(value = "/car/add/{dealerId}",params = {"removeRow"},method = RequestMethod.POST)
+	private String removeRow(@ModelAttribute DealerModel dealer , Model model,HttpServletRequest req) {
+		int rowId = Integer.valueOf(req.getParameter("removeRow"));
+		dealer.getListCar().remove(rowId);
+		model.addAttribute("dealer", dealer);
+
+		return "addCar";
+	}
+	
+	@RequestMapping(value = "/car/add/{dealerId}",params = {"save"},method = RequestMethod.POST)
+	private String saveAdd(@PathVariable(value="dealerId") Long id,@ModelAttribute DealerModel dealer , Model model) {
+		//mengambil data dealer dari db
+		DealerModel dealerBaru = dealerService.getDealerDetailById(id).get();
+		//nambah mobil yang tadi diinput
+		for(CarModel car : dealer.getListCar()) {
+			car.setDealer(dealerBaru);
+			carService.addCar(car);
+		}
+
+		return "add";
+	}
+
+	
+	
+	
+	
 	
 	@RequestMapping(value = "/car/add", method = RequestMethod.POST)
 	private String addCarSubmit(@ModelAttribute CarModel car) {
